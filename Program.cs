@@ -57,10 +57,10 @@ namespace WordScraper
              "corpse","kidnapping","ransom","murder","torture","corruption","KFR", "assualt", "fire","disaster","PNP", "hurt",
              "carnapping","MILF","ISIS", "BIFF", "pirate","bandits", "terrorists", "Terror",
             };
+        }
 
-
-            public class Website
-            {
+        public class Website
+        {
                 //
                 //Set our list of websites to crawl
                 //
@@ -81,7 +81,7 @@ namespace WordScraper
                 "http://www.thenewstoday.info//)",
             };
 
-            }
+        }
 
 
             class Program
@@ -112,6 +112,7 @@ namespace WordScraper
                                 Console.WriteLine(url + " is talking about " + keywords + " today.");
                                 Console.WriteLine("\nSnippet:" + pageContent.Substring(keywordLocation, 100));
                                 string Results = pageContent.Substring(keywordLocation);
+                                string resultswithHTML = Results;
 
                                 //
                                 //This will clean up the HTML before it is stored in the output file Results.txt and add a break to make the .txt readable
@@ -119,23 +120,24 @@ namespace WordScraper
 
                                 Results = Regex.Replace(Results, @"<[^>]+>|&nbsp;", "").Trim();
                                 Results = Regex.Replace(Results, @"\s{2,}", " ");
+                                System.IO.File.WriteAllText(@"C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\Results.txt", Results + "\r\n");
 
-                                System.IO.File.WriteAllText(@"C:\Users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\Results.txt", Results + "\r\n");
+                            ///
+                            ///Test to see that the location of the crime is stated in the Results of our crawl and place it in a variable crimeloctaion
+                            ///
 
-                                ///
-                                ///Test to see that the location of the crime is stated in the Results of our crawl and place it in a variable crimeloctaion
-                                ///
-                                var Crimelocation = location.Locations.Any(x => Results.Contains(x));
-                                string locationresults; 
-                                if (Crimelocation == true)
+                                Match locationsmatch = Regex.Match(Results, location);
+                                if (locationsmatch.Success)
                                 {
-                                    
+                                    locationsmatch.ToString();
                                 }
+
                                 else
                                 {
-                                    locationresults = "No location given";
+                                    locationsmatch = "No regional results found";
                                 }
-
+                               
+                                
                                 ///
                                 ///Add the local time of the crawl to the results.  This does not have to be specific per customer request so we will use the date of the pull.
                                 ///
@@ -241,9 +243,16 @@ namespace WordScraper
                 }
 
             }
-        }
     }
 }
+
+
+
+
+
+
+
+    
 
 
 
