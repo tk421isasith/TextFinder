@@ -1,0 +1,12 @@
+c:\users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\bin\Debug\ConsoleApp8.exe.config
+c:\users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\bin\Debug\ConsoleApp8.exe
+c:\users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\bin\Debug\ConsoleApp8.pdb
+c:\users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\obj\Debug\WordScraper.csproj.CoreCompileInputs.cache
+c:\users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\obj\Debug\ConsoleApp8.exe
+c:\users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\obj\Debug\ConsoleApp8.pdb
+C:\Users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\bin\Debug\HtmlAgilityPack.dll
+C:\Users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\bin\Debug\HtmlAgilityPack.pdb
+C:\Users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\bin\Debug\HtmlAgilityPack.xml
+C:\Users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\obj\Debug\WordScraper.csprojResolveAssemblyReference.cache
+C:\Users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\bin\Debug\ResultsData.mdf
+C:\Users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\bin\Debug\ResultsData_log.ldf
