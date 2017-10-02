@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -20,13 +20,16 @@ namespace WordScraper
             // Set a list of Locations we will later use in our database Location column
             //            
             public List<string> Locations = new List<string>()
-          {
+            {
               "Luzon","Ilocos,","Cagayan Valley","Central Luzon","Calabarzon","Mimaropa","Bicol","Cordillera Administrative Region (CAR)",
               "National Capital Region","Visayas","Westen Visayas","Central Visayas","Eastern Visayas","Mindanao","Zamboanga Penisula",
               "Northern Mindanao","Davao Region","Soccsksargen","Caraga","Autonomous Region of Muslim Mindanao","ARRM","SULU",
-           };
-            
+            };
 
+            internal void ForEach(Func<object, StringBuilder> p)
+            {
+                throw new NotImplementedException();
+            }
         }
         public class Crimes
         {
@@ -34,8 +37,9 @@ namespace WordScraper
             //Set the keywords we want to scrape from our website in a list called list
             //
             public List<string> list = new List<string>()
-            {      "corpse","kidnapping","ransom", "murder", "torture", "corruption", "KFR","assualt","fire","disaster",
-                   "PNP","hurt", "carnapping", "MILF", "ISIS", "BIFF", "pirate","bandits",
+            {
+                "corpse","kidnapping","ransom", "murder", "torture", "corruption", "KFR","assualt","fire","disaster",
+                "PNP","hurt", "carnapping", "MILF", "ISIS", "BIFF", "pirate","bandits",
             };
         }
         public class Organization
@@ -45,8 +49,8 @@ namespace WordScraper
             //
             public List<string> Terrorist = new List<string>()
             {
-                    "MILF","Moro Islamic Liberation Front","BIFF","Bangsamoro Islamic Freedom Fighters","JI", "Jemaah Islamiyah",
-                    "ASG", "Abu Sayyaf Group","NPA", "New People’s Army","ISIS","IS","ISIL","Daesh",
+                  "MILF","Moro Islamic Liberation Front","BIFF","Bangsamoro Islamic Freedom Fighters","JI", "Jemaah Islamiyah",
+                  "ASG", "Abu Sayyaf Group","NPA", "New People’s Army","ISIS","IS","ISIL","Daesh",
             };
         }
         public class Keyword
@@ -90,7 +94,7 @@ namespace WordScraper
         {
             static void Main(string[] args)
             {
-
+                
                 Methods method = new Methods();
                 Website web = new Website();
                 Keyword word = new Keyword();
@@ -127,21 +131,23 @@ namespace WordScraper
                             ///
                             ///Test to see that the location of the crime is stated in the Results of our crawl and place it in a variable crimeloctaion
                             ///
-                            String.Join(String.Empty, location);
-                            StringBuilder locationcollection = new StringBuilder();
-                            location.ForEach(z => locationcollection.Append(z));
-                            Match locationsmatch = Regex.Match(Results, location);
-                            if (locationsmatch.Success)
-                            {
-                                string loc = locationcollection;
-                            }
+                            var locationstringcollection = location.Locations;
+                            var stringcollectionlocation = locationstringcollection.Aggregate((a, b) => a + ", " + b);
+                            // StringBuilder locationcollection = new StringBuilder();
+                            // location.ForEach(z => locationcollection.Append(z));
+                            Match locationsmatch = Regex.Match(Results, stringcollectionlocation);
+                                if (locationsmatch.Success)
+                            
+                                {
+                                 string loc = locationsmatch;
+                                }
 
-                            else
-                            {
-                                string loc = "No location data given";
-                            }
-
-
+                                else
+                                {
+                                    string loc = "No location data given";
+                                }
+                            
+                            
                             ///
                             ///Add the local time of the crawl to the results.  This does not have to be specific per customer request so we will use the date of the pull.
                             ///
@@ -153,9 +159,8 @@ namespace WordScraper
                             ///
 
                             var organizations = organization.Terrorist.Any(x => Results.Contains(x));
-
-
-                            /// Results.(Results + "\r\n");
+                           
+                            ///
                             ///We will now write the results of the file Results to a .txt file named Results.txt
                             ///TODO clean up the results so there is a website url and page break added to make the .txt file more readable.
                             ///
@@ -165,7 +170,8 @@ namespace WordScraper
 
                             {
                                 string line;
-                                //using (StreamReader file = new StreamReader(@"C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\Results.txt"));
+                                using (StreamReader file = new StreamReader(@"C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\Results.txt"));
+
                                 if ((line = reader.ReadLine()) != null)
                                 {
                                     string[] fields = line.Split(',');
@@ -177,6 +183,8 @@ namespace WordScraper
                                         {
                                             string sqlquery = "INSERT INTO C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf (Crimelocation, Currenttime, location, organization) VALUES (@Crime, @Date, @Location, @Organization,)";
                                             // SqlCommand cmd = new SqlCommand("INSERT INTO @C:\\Users\\wwstudent\\source\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf(@Crime, @Date, @Location, @Organization) VALUES (Crimelocation, Currenttime, location, organization)", con);
+                                            //Need to determin if I need to make a string as the SQL command or if I can just type it to avoid redundancy
+
                                             SqlCommand cmd = new SqlCommand(sqlquery);
                                             cmd.Parameters.AddWithValue("@Crime", loc);
                                             cmd.Parameters.AddWithValue("@Date", CurrentTime.ToString());
@@ -248,3 +256,5 @@ namespace WordScraper
         }
     }
 }
+// Created by Thomas P. Kasulke.  Please use freely and openly.  Critiques are always welcome.
+// https://github.com/tk421isasith
