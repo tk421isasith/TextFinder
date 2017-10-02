@@ -8,6 +8,7 @@ using System.Net;
 using System.IO;
 using HtmlAgilityPack;
 using System.Data.SqlClient;
+using System.Configuration;
 
 
 namespace WordScraper
@@ -31,6 +32,7 @@ namespace WordScraper
                 throw new NotImplementedException();
             }
         }
+       
         public class Crimes
         {
             //
@@ -131,22 +133,17 @@ namespace WordScraper
                             ///
                             ///Test to see that the location of the crime is stated in the Results of our crawl and place it in a variable crimeloctaion
                             ///
+
                             var locationstringcollection = location.Locations;
                             var stringcollectionlocation = locationstringcollection.Aggregate((a, b) => a + ", " + b);
+
                             // StringBuilder locationcollection = new StringBuilder();
                             // location.ForEach(z => locationcollection.Append(z));
-                            Match locationsmatch = Regex.Match(Results, stringcollectionlocation);
-                                if (locationsmatch.Success)
-                            
-                                {
-                                 string loc = locationsmatch;
-                                }
+                            // Match locationsmatch = Regex.Match(Results, stringcollectionlocation);
 
-                                else
-                                {
-                                    string loc = "No location data given";
-                                }
-                            
+                            MatchCollection locationsmatch = Regex.Matches(Results, stringcollectionlocation);
+                            //foreach (Match matches in locationsmatch)
+                            string loc = locationsmatch.ToString();
                             
                             ///
                             ///Add the local time of the crawl to the results.  This does not have to be specific per customer request so we will use the date of the pull.
@@ -159,14 +156,14 @@ namespace WordScraper
                             ///
 
                             var organizations = organization.Terrorist.Any(x => Results.Contains(x));
-                           
+                            string terroristorganization = organizations.ToString();
                             ///
                             ///We will now write the results of the file Results to a .txt file named Results.txt
                             ///TODO clean up the results so there is a website url and page break added to make the .txt file more readable.
                             ///
 
                             List<string> resultslist = new List<string>();
-                            using (StreamReader reader = new StreamReader(@"C:\Users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\Results.txt"))
+                            using (StreamReader reader = new StreamReader(@"C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\Results.txt"))
 
                             {
                                 string line;
@@ -176,26 +173,33 @@ namespace WordScraper
                                 {
                                     string[] fields = line.Split(',');
                                     using (SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\ResultsData.mdf;Integrated Security=True"))
-                                    {
 
-                                        con.Open();
                                         while ((line = reader.ReadLine()) != null)
                                         {
-                                            string sqlquery = "INSERT INTO C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf (Crimelocation, Currenttime, location, organization) VALUES (@Crime, @Date, @Location, @Organization,)";
-                                            // SqlCommand cmd = new SqlCommand("INSERT INTO @C:\\Users\\wwstudent\\source\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf(@Crime, @Date, @Location, @Organization) VALUES (Crimelocation, Currenttime, location, organization)", con);
-                                            //Need to determin if I need to make a string as the SQL command or if I can just type it to avoid redundancy
 
-                                            SqlCommand cmd = new SqlCommand(sqlquery);
-                                            cmd.Parameters.AddWithValue("@Crime", loc);
-                                            cmd.Parameters.AddWithValue("@Date", CurrentTime.ToString());
-                                            cmd.Parameters.AddWithValue("@Location", location.ToString());
-                                            cmd.Parameters.AddWithValue("@Organization", organization.ToString());
+                                            //string sqlquery = "INSERT INTO @C:\\Users\\wwstudent\\source\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf(Crimelocation, Currenttime, location, organization) VALUES(@Crime, @Date, @Location, @Organization)";
+                                            //SqlCommand cmd = con.CreateCommand();
+                                            using (SqlCommand cmd = new SqlCommand("INSERT INTO @C:\\Users\\wwstudent\\source\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf(Crimelocation, Currenttime, location, organization) VALUES(@Crime, @Date, @Location, @Organization)", con))
+                                            {
+                                                cmd.CommandText = "INSERT INTO C:\\Users\\wwstudent\\source\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf(Crimelocation, Currenttime, location, organization) VALUES(@Crime, @Date, @Location, @Organization)";
+                                                cmd.CommandTimeout = 15;
+                                                cmd.CommandType = System.Data.CommandType.Text;
+                                                cmd.Parameters.AddWithValue("@Crime", keywords);
+                                                cmd.Parameters.AddWithValue("@Date", CurrentTime);
+                                                cmd.Parameters.AddWithValue("@Location", loc);
+                                                cmd.Parameters.AddWithValue("@Organization", terroristorganization);
+                                                con.Open();
+                                                int rowsAffected = cmd.ExecuteNonQuery();
+                                                con.Close();
 
-                                            cmd.ExecuteNonQuery();
+                                            }
                                         }
-                                    }
 
                                 }
+                                else
+                                {
+
+                                };
                                 /*    
                                 *    
                                 *    Uncomment if you want another .txt file with more information from the websites
@@ -236,14 +240,7 @@ namespace WordScraper
                        Console.WriteLine("{0} not found not found at {1}", (string)keywords, (string)url);
                 }*/
 
-
-
-
-
-
-
-
-
+                
                 //
                 //Create a list of string that will later be used to create a function that will assign region names from the string to a variable named Location which will be addded to the database
                 //
