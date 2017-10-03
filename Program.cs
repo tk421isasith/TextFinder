@@ -3,13 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using System.Net;
 using System.IO;
-using HtmlAgilityPack;
 using System.Data.SqlClient;
-using System.Configuration;
-
 
 namespace WordScraper
 {
@@ -32,7 +28,7 @@ namespace WordScraper
                 throw new NotImplementedException();
             }
         }
-       
+
         public class Crimes
         {
             //
@@ -96,139 +92,195 @@ namespace WordScraper
         {
             static void Main(string[] args)
             {
-                
+
                 Methods method = new Methods();
                 Website web = new Website();
                 Keyword word = new Keyword();
                 Organization organization = new Organization();
                 Crimes crime = new Crimes();
                 Location location = new Location();
-
+                
                 foreach (string s in web.sites)
                 {
-                    var client = new WebClient();
-                    var url = s;
-                    var pageContent = client.DownloadString(url);
-                    foreach (string l in word.list)
-
+                    WebClient client = null;
+                    try
                     {
-                        var keywords = l;
-                        var keywordLocation = pageContent.IndexOf(keywords, StringComparison.OrdinalIgnoreCase);
+                        client = new WebClient();
+                        var url = s;
+                        var pageContent = client.DownloadString(url);
 
-                        if (keywordLocation >= 0)
+                        foreach (string l in word.list)
+
                         {
-                            Console.WriteLine(url + " is talking about " + keywords + " today.");
-                            Console.WriteLine("\nSnippet:" + pageContent.Substring(keywordLocation, 100));
-                            string Results = pageContent.Substring(keywordLocation);
-                            string resultswithHTML = Results;
+                            var keywords = l;
+                            var keywordLocation = pageContent.IndexOf(keywords, StringComparison.OrdinalIgnoreCase);
 
-                            //
-                            //This will clean up the HTML before it is stored in the output file Results.txt and add a break to make the .txt readable
-                            //
-
-                            Results = Regex.Replace(Results, @"<[^>]+>|&nbsp;", "").Trim();
-                            Results = Regex.Replace(Results, @"\s{2,}", " ");
-                            System.IO.File.WriteAllText(@"C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\Results.txt", Results + "\r\n");
-
-                            ///
-                            ///Test to see that the location of the crime is stated in the Results of our crawl and place it in a variable crimeloctaion
-                            ///
-
-                            var locationstringcollection = location.Locations;
-                            var stringcollectionlocation = locationstringcollection.Aggregate((a, b) => a + ", " + b);
-
-                            // StringBuilder locationcollection = new StringBuilder();
-                            // location.ForEach(z => locationcollection.Append(z));
-                            // Match locationsmatch = Regex.Match(Results, stringcollectionlocation);
-
-                            MatchCollection locationsmatch = Regex.Matches(Results, stringcollectionlocation);
-                            //foreach (Match matches in locationsmatch)
-                            string loc = locationsmatch.ToString();
-                            
-                            ///
-                            ///Add the local time of the crawl to the results.  This does not have to be specific per customer request so we will use the date of the pull.
-                            ///
-                            DateTime CurrentTime = DateTime.Now;
-                            TimeZoneInfo.ConvertTimeBySystemTimeZoneId(CurrentTime, TimeZoneInfo.Local.Id);
-
-                            ///
-                            ///We will now try to pull organization names that committed crimes from our keywords
-                            ///
-
-                            var organizations = organization.Terrorist.Any(x => Results.Contains(x));
-                            string terroristorganization = organizations.ToString();
-                            ///
-                            ///We will now write the results of the file Results to a .txt file named Results.txt
-                            ///TODO clean up the results so there is a website url and page break added to make the .txt file more readable.
-                            ///
-
-                            List<string> resultslist = new List<string>();
-                            using (StreamReader reader = new StreamReader(@"C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\Results.txt"))
-
+                            if (keywordLocation >= 0)
                             {
-                                string line;
-                                using (StreamReader file = new StreamReader(@"C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\Results.txt"));
+                                Console.WriteLine(url + " is talking about " + keywords + " today.");
+                                Console.WriteLine("\nSnippet:" + pageContent.Substring(keywordLocation, 100));
+                                string Results = pageContent.Substring(keywordLocation);
+                                string resultswithHTML = Results;
+                                File.WriteAllText(@"C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\resultswithHTML", Results + "\r\n");
 
-                                if ((line = reader.ReadLine()) != null)
+                                //
+                                //This will clean up the HTML before it is stored in the output file Results.txt and add a break to make the .txt readable
+                                //
+
+                                Results = Regex.Replace(Results, @"<[^>]+>|&nbsp;", "").Trim();
+                                Results = Regex.Replace(Results, @"\s{2,}", " ");
+                                File.WriteAllText(@"C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\Results.txt", Results + "\r\n");
+
+                                ///
+                                ///Test to see that the location of the crime is stated in the Results of our crawl and place it in a variable crimeloctaion
+                                ///
+
+                                var locationstringcollection = location.Locations;
+                                var stringcollectionlocation = locationstringcollection.Aggregate((a, b) => a + ", " + b);
+
+                                // StringBuilder locationcollection = new StringBuilder();
+                                // location.ForEach(z => locationcollection.Append(z));
+                                // Match locationsmatch = Regex.Match(Results, stringcollectionlocation);
+
+                                MatchCollection locationsmatch = Regex.Matches(Results, stringcollectionlocation);
+                                //foreach (Match matches in locationsmatch)
+                                string loc = locationsmatch.ToString();
+
+                                ///
+                                ///Add the local time of the crawl to the results.  This does not have to be specific per customer request so we will use the date of the pull.
+                                ///
+                                DateTime CurrentTime = DateTime.Now;
+                                TimeZoneInfo.ConvertTimeBySystemTimeZoneId(CurrentTime, TimeZoneInfo.Local.Id);
+
+                                ///
+                                ///We will now try to pull organization names that committed crimes from our keywords
+                                ///
+
+                                var organizations = organization.Terrorist.Any(x => Results.Contains(x));
+                                string terroristorganization = organizations.ToString();
+                                ///
+                                ///We will now write the results of the file Results to a .txt file named Results.txt
+                                ///TODO clean up the results so there is a website url and page break added to make the .txt file more readable.
+                                ///
+
+                                List<string> resultslist = new List<string>();
+                                using (StreamReader reader = new StreamReader(@"C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\Results.txt"))
+
                                 {
-                                    string[] fields = line.Split(',');
-                                    using (SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\ResultsData.mdf;Integrated Security=True"))
+                                    string line;
+                                    using (StreamReader file = new StreamReader(@"C:\\Users\\wwstudent\\source\\repos\\ConsoleApp8\\ConsoleApp8\\Results.txt")) ;
 
-                                        while ((line = reader.ReadLine()) != null)
-                                        {
+                                    if ((line = reader.ReadLine()) != null)
+                                    {
+                                        string[] fields = line.Split(',');
+                                        using (SqlConnection con = new SqlConnection(@"Data Source=(LocalDB)\MSSQLLocalDB;AttachDbFilename=C:\Users\wwstudent\source\repos\ConsoleApp8\ConsoleApp8\ResultsData.mdf;Integrated Security=True"))
 
-                                            //string sqlquery = "INSERT INTO @C:\\Users\\wwstudent\\source\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf(Crimelocation, Currenttime, location, organization) VALUES(@Crime, @Date, @Location, @Organization)";
-                                            //SqlCommand cmd = con.CreateCommand();
-                                            using (SqlCommand cmd = new SqlCommand("INSERT INTO @C:\\Users\\wwstudent\\source\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf(Crimelocation, Currenttime, location, organization) VALUES(@Crime, @Date, @Location, @Organization)", con))
+                                            while ((line = reader.ReadLine()) != null)
                                             {
-                                                cmd.CommandText = "INSERT INTO C:\\Users\\wwstudent\\source\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf(Crimelocation, Currenttime, location, organization) VALUES(@Crime, @Date, @Location, @Organization)";
-                                                cmd.CommandTimeout = 15;
-                                                cmd.CommandType = System.Data.CommandType.Text;
-                                                cmd.Parameters.AddWithValue("@Crime", keywords);
-                                                cmd.Parameters.AddWithValue("@Date", CurrentTime);
-                                                cmd.Parameters.AddWithValue("@Location", loc);
-                                                cmd.Parameters.AddWithValue("@Organization", terroristorganization);
-                                                con.Open();
-                                                int rowsAffected = cmd.ExecuteNonQuery();
-                                                con.Close();
 
+                                                //string sqlquery = "INSERT INTO @C:\\Users\\wwstudent\\source\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf(Crimelocation, Currenttime, location, organization) VALUES(@Crime, @Date, @Location, @Organization)";
+                                                //SqlCommand cmd = con.CreateCommand();
+                                                using (SqlCommand cmd = new SqlCommand("INSERT INTO @C:\\Users\\wwstudent\\source\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf(Crimelocation, Currenttime, location, organization) VALUES(@Crime, @Date, @Location, @Organization)", con))
+                                                {
+                                                    cmd.CommandText = "INSERT INTO C:\\Users\\wwstudent\\source\repos\\ConsoleApp8\\ConsoleApp8\\ResultsData.mdf(Crimelocation, Currenttime, location, organization) VALUES(@Crime, @Date, @Location, @Organization)";
+                                                    cmd.CommandTimeout = 15;
+                                                    cmd.CommandType = System.Data.CommandType.Text;
+                                                    cmd.Parameters.AddWithValue("@Crime", keywords);
+                                                    cmd.Parameters.AddWithValue("@Date", CurrentTime);
+                                                    cmd.Parameters.AddWithValue("@Location", loc);
+                                                    cmd.Parameters.AddWithValue("@Organization", terroristorganization);
+                                                    con.Open();
+                                                    // int rowsAffected = cmd.ExecuteNonQuery();
+                                                    con.Close();
+
+                                                }
                                             }
-                                        }
 
-                                }
-                                else
-                                {
-
-                                };
-                                /*    
-                                *    
-                                *    Uncomment if you want another .txt file with more information from the websites
-                                *    Make sure your file 
-                                *    
-                                *    //
-                                *    // Read the file line-by-line, and store it all in a list named resultslist that we can later call to the database.
-                                *    //
-                                */
-
-                                /*  while ((line = reader.ReadLine()) != null)
-                                    {
-                                        resultslist.Add(line);
-                                    //fix this so it writes the file
-                                    using (StreamWriter Resultslist = new StreamWriter(@"C:\\USers\wwstudent\\Desktop\\Resultslist.txt", true))
-                                    {
-                                        Resultslist.Write(Results);
                                     }
-                                        // Add to list.
-                                        //Console.WriteLine(line); // Write to console.
-                                    }*/
+                                    else
+                                    {
+
+                                    };
+                                    /*    
+                                    *    
+                                    *    Uncomment if you want another .txt file with more information from the websites
+                                    *    Make sure your file 
+                                    *    
+                                    *    //
+                                    *    // Read the file line-by-line, and store it all in a list named resultslist that we can later call to the database.
+                                    *    //
+                                    */
+
+                                    /*  while ((line = reader.ReadLine()) != null)
+                                        {
+                                            resultslist.Add(line);
+                                        //fix this so it writes the file
+                                        using (StreamWriter Resultslist = new StreamWriter(@"C:\\USers\wwstudent\\Desktop\\Resultslist.txt", true))
+                                        {
+                                            Resultslist.Write(Results);
+                                        }
+                                            // Add to list.
+                                            //Console.WriteLine(line); // Write to console.
+                                        }*/
+                                }
                             }
+
+                            else
+                            { };
+
+
+
                         }
-
-                        else
-                        { };
-
-
-
+                    }
+                    catch (WebException ex) when (ex.Status == WebExceptionStatus.ProtocolError)
+                    {
+                        Console.WriteLine(web.sites + " displayed a WebExcpetion Protocol Error and was not scraped.");
+                    }
+                    catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.NotFound)
+                    {
+                        Console.WriteLine("A WebException NotFound error occured from " + web.sites + " and was not scraped.");
+                    }
+                    catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.InternalServerError)
+                    {
+                        Console.WriteLine("A WebException InternalServerError occured from " + web.sites + " and was not scraped.");
+                    }
+                    catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.RequestTimeout)
+                    {
+                        Console.WriteLine("The request timedout from " + web.sites +".");
+                    }
+                    catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.ServiceUnavailable)
+                    {
+                        Console.WriteLine(web.sites + " is unavailable.  The server is down.");
+                    }
+                    catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Conflict)
+                    
+                    {
+                        Console.WriteLine("The server is down from " + web.sites + ".");
+                    }
+                    catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Forbidden)
+                    {
+                        Console.WriteLine("We were denied access by " + web.sites);
+                    }
+                   
+                    catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.GatewayTimeout)
+                    {
+                        Console.WriteLine(web.sites +" timed out");
+                    }
+                    catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.BadRequest)
+                    {
+                        Console.WriteLine("We were denied access by " + web.sites);
+                    }
+                    catch (WebException ex) when ((ex.Response as HttpWebResponse)?.StatusCode == HttpStatusCode.Forbidden)
+                    {
+                        Console.WriteLine("We were denied access by " + web.sites);
+                    }
+                //    catch WebResponse ex) when ((ex.Response as )?.StatusCode == HttpWebRequest == 
+                 //      ) 
+                   
+                    finally
+                    {
+                        Console.WriteLine(web.sites + " was not used in crawl.");
+                        client.Dispose();
                     }
 
                 }
@@ -240,7 +292,7 @@ namespace WordScraper
                        Console.WriteLine("{0} not found not found at {1}", (string)keywords, (string)url);
                 }*/
 
-                
+
                 //
                 //Create a list of string that will later be used to create a function that will assign region names from the string to a variable named Location which will be addded to the database
                 //
@@ -255,3 +307,7 @@ namespace WordScraper
 }
 // Created by Thomas P. Kasulke.  Please use freely and openly.  Critiques are always welcome.
 // https://github.com/tk421isasith
+
+ 
+
+
